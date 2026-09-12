@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Para Ana Carolina F. Sales 💖</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Setup do React (Somente para Desenvolvimento) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script async src="https://ga.jspm.io/npm:es-module-shims@1.7.0/dist/es-module-shims.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react?dev",
+      "react-dom/client": "https://esm.sh/react-dom/client?dev"
+    }
+  }
+  </script>
+
+  <script type="text/babel" data-type="module">
+  import React, { StrictMode, useState, useEffect } from 'react';
+  import { createRoot } from 'react-dom/client';
+
+  const user = {
+    name: 'Ana Carolina F. Sales ',
+    imageUrl: 'Captura de tela 2024-11-05 220333.jpg', 
+    imageSize: 160,
+  };
+
+  // Novo Componente: Efeito de Máquina de Escrever
+  const Typewriter = ({ text, delay = 50, start = true }) => {
+    const [currentText, setCurrentText] = useState('');
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    useEffect(() => {
+      if (start && currentIndex < text.length) {
+        const timeout = setTimeout(() => {
+          setCurrentText(prevText => prevText + text[currentIndex]);
+          setCurrentIndex(prevIndex => prevIndex + 1);
+        }, delay);
+        return () => clearTimeout(timeout);
+      }
+    }, [currentIndex, delay, text, start]);
+
+    return <span>{currentText}</span>;
+  };
+
+  let App = function LoveLetter() {
+    const [isOpen, setIsOpen] = useState(false);
+    const [showText, setShowText] = useState(false);
+
+    // Pequeno atraso para começar a digitar após a carta abrir
+    useEffect(() => {
+      if (isOpen) {
+        setTimeout(() => setShowText(true), 600);
+      } else {
+        setShowText(false);
+      }
+    }, [isOpen]);
+
+    const textoCarta = "Transformei essas linhas de código em uma pequena carta de amor para te lembrar do quanto você é especial. Cada momento ao seu lado é mágico e ilumina o meu mundo. Obrigado por ser a melhor parte dos meus dias!";
+
+    return (
+      <div className="container">
+        
+        {/* Fundo animado de corações */}
+        <div className="bg-animation">
+          {[...Array(12)].map((_, i) => (
+            <div key={i} className="bubble" style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${6 + Math.random() * 4}s`,
+              fontSize: `${15 + Math.random() * 20}px`
+            }}>
+              {i % 2 === 0 ? '❤️' : '✨'}
+            </div>
+          ))}
+        </div>
+
+        <div className={`glass-card ${isOpen ? 'open' : ''}`}>
+          {!isOpen ? (
+            <div className="envelope" onClick={() => setIsOpen(true)}>
+              <div className="seal-container">
+                <div className="seal">💖</div>
+                <div className="pulse-ring"></div>
+              </div>
+              <h2>Para: {user.name}</h2>
+              <p className="hint">Toque para abrir</p>
+            </div>
+          ) : (
+            <div className="letter-content fade-in">
+              <h1 className="title">Minha amada {user.name},</h1>
+              
+              {/* Estilo Polaroid */}
+              <div className="polaroid">
+                <img
+                  src={user.imageUrl}
+                  alt={'Foto de ' + user.name}
+                  style={{
+                    width: user.imageSize,
+                    height: user.imageSize
+                  }}
+                />
+                <p className="polaroid-caption">Nós ❤️</p>
+              </div>
+
+              <div className="message">
+                <p>
+                  <Typewriter text={textoCarta} delay={40} start={showText} />
+                  {/* Cursor piscando falso */}
+                  {showText && <span className="cursor">|</span>}
+                </p>
+              </div>
+
+              <div className="signature-box">
+                <p className="signature">
+                  {showText && <Typewriter text="Com todo meu amor..." delay={80} start={showText} />}
+                </p>
+              </div>
+              
+              <button className="close-btn" onClick={() => setIsOpen(false)}>
+                Guardar
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const root = createRoot(document.getElementById('root'));
+  root.render(
+    <StrictMode>
+      <App />
+    </StrictMode>
+  );
+  </script>
+
+  <style>
+    :root {
+      --primary: #ff3366;
+      --secondary: #ff99ac;
+      --bg-gradient: radial-gradient(circle at center, #ffdde1 0%, #ee9ca7 100%);
+      --text: #333;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Glassmorphism Card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 24px;
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 480px;
+      min-height: 350px;
+      position: relative;
+      z-index: 10;
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    /* Envelope State */
+    .envelope {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 350px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .envelope:hover .seal {
+      transform: scale(1.15) rotate(5deg);
+    }
+
+    .seal-container {
+      position: relative;
+      margin-bottom: 25px;
+    }
+
+    .seal {
+      font-size: 60px;
+      position: relative;
+      z-index: 2;
+      transition: transform 0.3s ease;
+      filter: drop-shadow(0 5px 15px rgba(255, 51, 102, 0.4));
+    }
+
+    .pulse-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70px;
+      height: 70px;
+      background: var(--primary);
+      border-radius: 50%;
+      z-index: 1;
+      opacity: 0;
+      animation: pulsate 2s infinite ease-out;
+    }
+
+    .envelope h2 {
+      font-family: 'Dancing Script', cursive;
+      font-size: 38px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .hint {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #777;
+      animation: fadeInOut 2s infinite;
+    }
+
+    /* Letter State */
+    .letter-content {
+      padding: 45px 35px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .title {
+      font-family: 'Dancing Script', cursive;
+      font-size: 36px;
+      color: var(--primary);
+      margin-bottom: 25px;
+    }
+
+    /* Polaroid Effect */
+    .polaroid {
+      background: white;
+      padding: 10px 10px 30px 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      transform: rotate(-4deg);
+      display: inline-block;
+      margin-bottom: 30px;
+      transition: transform 0.3s ease;
+    }
+
+    .polaroid:hover {
+      transform: rotate(0deg) scale(1.05);
+      z-index: 5;
+    }
+
+    .polaroid img {
+      object-fit: cover;
+      display: block;
+      border: 1px solid #eee;
+    }
+
+    .polaroid-caption {
+      font-family: 'Dancing Script', cursive;
+      font-size: 22px;
+      color: var(--text);
+      margin-top: -20px;
+      text-align: center;
+    }
+
+    .message {
+      font-size: 16px;
+      line-height: 1.8;
+      color: #444;
+      text-align: justify;
+      margin-bottom: 30px;
+      min-height: 100px;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      background-color: var(--primary);
+      animation: blink 1s step-end infinite;
+      margin-left: 2px;
+    }
+
+    .signature-box {
+      width: 100%;
+      text-align: right;
+      min-height: 40px;
+    }
+
+    .signature {
+      font-family: 'Dancing Script', cursive;
+      font-size: 30px;
+      color: var(--primary);
+    }
+
+    .close-btn {
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      padding: 10px 30px;
+      border-radius: 30px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .close-btn:hover {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 8px 20px rgba(255, 51, 102, 0.3);
+    }
+
+    /* Animações CSS */
+    .fade-in {
+      animation: smoothFade 0.8s ease-out;
+    }
+
+    @keyframes smoothFade {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulsate {
+      0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+      100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+    }
+
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Corações de Fundo */
+    .bg-animation {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .bubble {
+      position: absolute;
+      bottom: -50px;
+      opacity: 0.4;
+      animation: floatUp infinite linear;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+      20% { opacity: 0.8; }
+      100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
+    }
+  </style>
+</body>
+</html>
