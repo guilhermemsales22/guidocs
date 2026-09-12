@@ -4,63 +4,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Modern Login and Registration Page">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <title>Modern Login Page | AsmrProg</title>
+    <title>Modern Login Page | Premium</title>
 </head>
 
 <body>
 
-    <div class="container" id="container">
-        <div class="form-container sign-up">
-            <form>
+    <!-- Trocado div por <main> -->
+    <main class="container" id="container">
+        
+        <!-- Formulário de Cadastro: trocado div por <section> -->
+        <section class="form-container sign-up">
+            <form action="#" method="POST">
                 <h1>Create Account</h1>
-                <div class="social-icons">
-                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
+                
+                <div class="social-icons" aria-label="Social registration options">
+                    <a href="#" class="icon" aria-label="Sign up with Google"><i class="fa-brands fa-google" aria-hidden="true"></i></a>
+                    <a href="#" class="icon" aria-label="Sign up with Facebook"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a>
+                    <a href="#" class="icon" aria-label="Sign up with GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
+                    <a href="#" class="icon" aria-label="Sign up with LinkedIn"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
                 </div>
-                <span>or use your email for registeration</span>
-                <input type="text" placeholder="Name">
-                <input type="email" placeholder="Email">
-                <input type="password" placeholder="Password">
-                <button>Sign Up</button>
+                
+                <span>or use your email for registration</span>
+                
+                <!-- Labels adicionados e vinculados aos inputs via ID -->
+                <label for="signup-name" class="sr-only">Name</label>
+                <input type="text" id="signup-name" name="name" placeholder="Name" required autocomplete="name">
+                
+                <label for="signup-email" class="sr-only">Email</label>
+                <input type="email" id="signup-email" name="email" placeholder="Email" required autocomplete="email">
+                
+                <label for="signup-password" class="sr-only">Password</label>
+                <input type="password" id="signup-password" name="password" placeholder="Password" required autocomplete="new-password">
+                
+                <button type="submit">Sign Up</button>
             </form>
-        </div>
-        <div class="form-container sign-in">
-            <form>
+        </section>
+
+        <!-- Formulário de Login: trocado div por <section> -->
+        <section class="form-container sign-in">
+            <form action="#" method="POST">
                 <h1>Sign In</h1>
-                <div class="social-icons">
-                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
+                
+                <div class="social-icons" aria-label="Social login options">
+                    <a href="#" class="icon" aria-label="Sign in with Google"><i class="fa-brands fa-google" aria-hidden="true"></i></a>
+                    <a href="#" class="icon" aria-label="Sign in with Facebook"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a>
+                    <a href="#" class="icon" aria-label="Sign in with GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
+                    <a href="#" class="icon" aria-label="Sign in with LinkedIn"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
                 </div>
+                
                 <span>or use your email password</span>
-                <input type="email" placeholder="Email">
-                <input type="password" placeholder="Password">
-                <a href="#">Forget Your Password?</a>
-                <button>Sign In</button>
+                
+                <label for="login-email" class="sr-only">Email</label>
+                <input type="email" id="login-email" name="email" placeholder="Email" required autocomplete="email">
+                
+                <label for="login-password" class="sr-only">Password</label>
+                <input type="password" id="login-password" name="password" placeholder="Password" required autocomplete="current-password">
+                
+                <a href="#" class="forgot-pass-link">Forgot Your Password?</a>
+                <button type="submit">Sign In</button>
             </form>
-        </div>
-        <div class="toggle-container">
+        </section>
+
+        <!-- Painel de Transição: trocado div por <aside> -->
+        <aside class="toggle-container">
             <div class="toggle">
                 <div class="toggle-panel toggle-left">
-                    <h1>Welcome Back!</h1>
-                    <p>Enter your personal details to use all of site features</p>
-                    <button class="hidden" id="login">Sign In</button>
+                    <h2>Welcome Back!</h2>
+                    <p>Enter your personal details to use all of the site's features</p>
+                    <button type="button" class="hidden" id="login">Sign In</button>
                 </div>
                 <div class="toggle-panel toggle-right">
-                    <h1>Hello, Friend!</h1>
-                    <p>Register with your personal details to use all of site features</p>
-                    <button class="hidden" id="register">Sign Up</button>
+                    <h2>Hello, Friend!</h2>
+                    <p>Register with your personal details to use all of the site's features</p>
+                    <button type="button" class="hidden" id="register">Sign Up</button>
                 </div>
             </div>
-        </div>
-    </div>
+        </aside>
+    </main>
 
-    <script src="script.js"></script>
+    <script>
+        const container = document.getElementById('container');
+        const registerBtn = document.getElementById('register');
+        const loginBtn = document.getElementById('login');
+
+        registerBtn.addEventListener('click', () => {
+            container.classList.add("active");
+        });
+
+        loginBtn.addEventListener('click', () => {
+            container.classList.remove("active");
+        });
+    </script>
+</body>
+</html>
 </body>
 
 </html>
