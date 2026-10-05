@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora e conversores</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+            font-synthesis: none;
+            text-rendering: optimizeLegibility;
+            --text: #f3f6ff;
+            --muted: #8994b2;
+            --panel: #11182a;
+            --panel-light: #182139;
+            --line: rgba(164, 180, 225, 0.12);
+            --cyan: #59f2e4;
+            --violet: #9b8cff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            padding: 28px 16px;
+            color: var(--text);
+            background:
+                radial-gradient(ellipse at 18% 15%, rgba(75, 85, 190, 0.22), transparent 34%),
+                radial-gradient(ellipse at 85% 82%, rgba(21, 194, 190, 0.12), transparent 32%),
+                #080c17;
+            font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+        }
+
+        .app {
+            position: relative;
+            width: min(100%, 410px);
+            padding: 28px;
+            overflow: hidden;
+            border: 1px solid rgba(161, 178, 224, 0.18);
+            border-radius: 28px;
+            background: linear-gradient(145deg, rgba(20, 28, 48, 0.97), rgba(12, 17, 31, 0.98));
+            box-shadow: 0 32px 90px rgba(0, 0, 0, 0.55), 0 0 50px rgba(89, 242, 228, 0.06);
+        }
+
+        .app::before {
+            position: absolute;
+            top: 0;
+            left: 12%;
+            width: 76%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--cyan), var(--violet), transparent);
+            content: '';
+            opacity: 0.75;
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .eyebrow {
+            margin-bottom: 5px;
+            color: var(--cyan);
+            font-size: 0.67rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .app-header h1 {
+            font-size: 1.5rem;
+            font-weight: 650;
+            letter-spacing: -0.04em;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--muted);
+            font-size: 0.68rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .system-status::before {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--cyan);
+            box-shadow: 0 0 12px var(--cyan);
+            content: '';
+        }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-bottom: 20px;
+            padding: 5px;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            background: rgba(5, 9, 19, 0.55);
+        }
+
+        button {
+            border: 1px solid transparent;
+            border-radius: 10px;
+            color: var(--text);
+            cursor: pointer;
+            font: inherit;
+            font-weight: 650;
+            transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        button:focus-visible,
+        .field input:focus-visible,
+        .field select:focus-visible {
+            outline: 2px solid var(--cyan);
+            outline-offset: 3px;
+        }
+
+        .tab {
+            padding: 11px 6px;
+            background: transparent;
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        .tab:hover {
+            color: var(--text);
+        }
+
+        .tab[aria-pressed="true"] {
+            border-color: rgba(151, 142, 255, 0.25);
+            background: linear-gradient(135deg, rgba(122, 110, 234, 0.28), rgba(58, 198, 204, 0.12));
+            box-shadow: inset 0 0 18px rgba(115, 135, 255, 0.08);
+            color: #fff;
+        }
+
+        .panel[hidden] {
+            display: none;
+        }
+
+        .display {
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            min-height: 116px;
+            margin-bottom: 16px;
+            padding: 22px 18px;
+            overflow: hidden;
+            border: 1px solid rgba(89, 242, 228, 0.16);
+            border-radius: 17px;
+            background:
+                linear-gradient(140deg, rgba(27, 43, 63, 0.88), rgba(13, 20, 34, 0.98)),
+                var(--panel);
+            box-shadow: inset 0 0 30px rgba(22, 197, 192, 0.035);
+            color: var(--cyan);
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+            font-size: clamp(2.25rem, 11vw, 3.1rem);
+            font-variant-numeric: tabular-nums;
+            font-weight: 400;
+            letter-spacing: -0.06em;
+            text-align: right;
+            text-shadow: 0 0 24px rgba(89, 242, 228, 0.24);
+            word-break: break-all;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .buttons button {
+            min-height: 60px;
+            padding: 12px;
+            border-color: var(--line);
+            background: linear-gradient(145deg, #202a42, #171f33);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.14);
+            font-size: 1.23rem;
+        }
+
+        .buttons .number,
+        .buttons .decimal {
+            color: #e7ebf8;
+        }
+
+        .buttons .number:hover,
+        .buttons .decimal:hover {
+            border-color: rgba(180, 195, 235, 0.28);
+            background: linear-gradient(145deg, #2a3652, #1c2740);
+        }
+
+        .buttons .operator {
+            border-color: rgba(155, 140, 255, 0.18);
+            background: linear-gradient(145deg, rgba(106, 94, 204, 0.35), rgba(62, 64, 128, 0.28));
+            color: #b7adff;
+        }
+
+        .buttons .operator:hover {
+            border-color: rgba(155, 140, 255, 0.5);
+            background: rgba(122, 110, 234, 0.4);
+        }
+
+        .buttons .clear {
+            grid-column: span 2;
+            border-color: rgba(255, 120, 143, 0.2);
+            background: linear-gradient(145deg, rgba(184, 70, 103, 0.3), rgba(112, 46, 76, 0.28));
+            color: #ff9aad;
+            font-size: 1rem;
+        }
+
+        .buttons .clear:hover {
+            border-color: rgba(255, 120, 143, 0.48);
+            background: rgba(184, 70, 103, 0.4);
+        }
+
+        .buttons .equals {
+            grid-column: span 2;
+            border-color: rgba(89, 242, 228, 0.34);
+            background: linear-gradient(110deg, #25bfb4, #4bd8ca);
+            box-shadow: 0 7px 20px rgba(37, 191, 180, 0.2);
+            color: #071a20;
+        }
+
+        .buttons .equals:hover {
+            background: linear-gradient(110deg, #37d4c6, #72f3e2);
+            box-shadow: 0 8px 24px rgba(37, 191, 180, 0.34);
+        }
+
+        .converter h2 {
+            margin-bottom: 8px;
+            font-size: 1.45rem;
+            letter-spacing: -0.035em;
+        }
+
+        .description {
+            margin-bottom: 22px;
+            color: var(--muted);
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+
+        .field {
+            display: block;
+            margin-bottom: 15px;
+            color: #c5cce0;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .field input,
+        .field select {
+            display: block;
+            width: 100%;
+            margin-top: 7px;
+            padding: 12px 13px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #0d1424;
+            color: var(--text);
+            font: inherit;
+            font-size: 0.94rem;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: rgba(89, 242, 228, 0.55);
+        }
+
+        .convert-button {
+            width: 100%;
+            margin-top: 3px;
+            padding: 14px;
+            border-color: rgba(89, 242, 228, 0.32);
+            background: linear-gradient(110deg, #25bfb4, #4bd8ca);
+            box-shadow: 0 7px 20px rgba(37, 191, 180, 0.16);
+            color: #071a20;
+            font-size: 0.95rem;
+        }
+
+        .convert-button:hover {
+            background: linear-gradient(110deg, #37d4c6, #72f3e2);
+        }
+
+        .convert-button:disabled {
+            cursor: wait;
+            opacity: 0.6;
+            transform: none;
+        }
+
+        .result {
+            min-height: 28px;
+            margin-top: 18px;
+            color: var(--cyan);
+            font-size: 1.25rem;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .status {
+            min-height: 24px;
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 440px) {
+            .app {
+                padding: 22px 18px;
+                border-radius: 22px;
+            }
+
+            .buttons {
+                gap: 8px;
+            }
+
+            .buttons button {
+                min-height: 56px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="app">
+        <header class="app-header">
+            <div>
+                <p class="eyebrow">Interface digital</p>
+                <h1>Central de cálculo</h1>
+            </div>
+            <span class="system-status">Pronto</span>
+        </header>
+        <nav class="tabs" aria-label="Ferramentas">
+            <button class="tab" type="button" aria-pressed="true" data-panel="calculator-panel">Calculadora</button>
+            <button class="tab" type="button" aria-pressed="false" data-panel="currency-panel">Moedas</button>
+            <button class="tab" type="button" aria-pressed="false" data-panel="temperature-panel">Temperatura</button>
+        </nav>
+
+        <section class="panel calculator" id="calculator-panel" aria-label="Calculadora">
+            <div class="display" id="display" aria-live="polite">0</div>
+            <div class="buttons">
+                <button class="clear" type="button" onclick="clearDisplay()">C</button>
+                <button class="operator" type="button" onclick="appendOperator('/')">÷</button>
+                <button class="operator" type="button" onclick="appendOperator('*')">×</button>
+
+                <button class="number" type="button" onclick="appendNumber('7')">7</button>
+                <button class="number" type="button" onclick="appendNumber('8')">8</button>
+                <button class="number" type="button" onclick="appendNumber('9')">9</button>
+                <button class="operator" type="button" onclick="appendOperator('-')">−</button>
+
+                <button class="number" type="button" onclick="appendNumber('4')">4</button>
+                <button class="number" type="button" onclick="appendNumber('5')">5</button>
+                <button class="number" type="button" onclick="appendNumber('6')">6</button>
+                <button class="operator" type="button" onclick="appendOperator('+')">+</button>
+
+                <button class="number" type="button" onclick="appendNumber('1')">1</button>
+                <button class="number" type="button" onclick="appendNumber('2')">2</button>
+                <button class="number" type="button" onclick="appendNumber('3')">3</button>
+                <button class="operator" type="button" onclick="appendOperator('%')">%</button>
+
+                <button class="number" type="button" onclick="appendNumber('0')">0</button>
+                <button class="decimal" type="button" onclick="appendNumber('.')">.</button>
+                <button class="equals" type="button" onclick="calculate()">=</button>
+            </div>
+        </section>
+
+        <section class="panel converter" id="currency-panel" aria-labelledby="currency-title" hidden>
+            <h2 id="currency-title">Conversor de moedas</h2>
+            <p class="description">Consulte a conversão usando a cotação de referência mais recente disponível.</p>
+            <label class="field" for="currency-amount">
+                Valor
+                <input id="currency-amount" type="number" min="0" step="any" value="1">
+            </label>
+            <label class="field" for="currency-from">
+                De
+                <select id="currency-from">
+                    <option value="BRL" selected>Real brasileiro (BRL)</option>
+                    <option value="USD">Dólar americano (USD)</option>
+                    <option value="EUR">Euro (EUR)</option>
+                    <option value="GBP">Libra esterlina (GBP)</option>
+                    <option value="JPY">Iene japonês (JPY)</option>
+                    <option value="CAD">Dólar canadense (CAD)</option>
+                    <option value="AUD">Dólar australiano (AUD)</option>
+                    <option value="CHF">Franco suíço (CHF)</option>
+                    <option value="CNY">Yuan chinês (CNY)</option>
+                    <option value="ARS">Peso argentino (ARS)</option>
+                </select>
+            </label>
+            <label class="field" for="currency-to">
+                Para
+                <select id="currency-to">
+                    <option value="BRL">Real brasileiro (BRL)</option>
+                    <option value="USD" selected>Dólar americano (USD)</option>
+                    <option value="EUR">Euro (EUR)</option>
+                    <option value="GBP">Libra esterlina (GBP)</option>
+                    <option value="JPY">Iene japonês (JPY)</option>
+                    <option value="CAD">Dólar canadense (CAD)</option>
+                    <option value="AUD">Dólar australiano (AUD)</option>
+                    <option value="CHF">Franco suíço (CHF)</option>
+                    <option value="CNY">Yuan chinês (CNY)</option>
+                    <option value="ARS">Peso argentino (ARS)</option>
+                </select>
+            </label>
+            <button class="convert-button" id="convert-currency" type="button">Converter</button>
+            <p class="result" id="currency-result" aria-live="polite"></p>
+            <p class="status" id="currency-status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel converter" id="temperature-panel" aria-labelledby="temperature-title" hidden>
+            <h2 id="temperature-title">Conversor de temperatura</h2>
+            <p class="description">Converta entre Celsius, Fahrenheit e Kelvin.</p>
+            <label class="field" for="temperature-value">
+                Temperatura
+                <input id="temperature-value" type="number" step="any" value="0">
+            </label>
+            <label class="field" for="temperature-from">
+                De
+                <select id="temperature-from">
+                    <option value="C" selected>Celsius (°C)</option>
+                    <option value="F">Fahrenheit (°F)</option>
+                    <option value="K">Kelvin (K)</option>
+                </select>
+            </label>
+            <label class="field" for="temperature-to">
+                Para
+                <select id="temperature-to">
+                    <option value="C">Celsius (°C)</option>
+                    <option value="F" selected>Fahrenheit (°F)</option>
+                    <option value="K">Kelvin (K)</option>
+                </select>
+            </label>
+            <button class="convert-button" id="convert-temperature" type="button">Converter</button>
+            <p class="result" id="temperature-result" aria-live="polite"></p>
+            <p class="status" id="temperature-status" aria-live="polite"></p>
+        </section>
+    </main>
+
+    <script>
+        document.querySelectorAll('.tab').forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                document.querySelectorAll('.tab').forEach(function (item) {
+                    item.setAttribute('aria-pressed', String(item === tab));
+                });
+                document.querySelectorAll('.panel').forEach(function (panel) {
+                    panel.hidden = panel.id !== tab.dataset.panel;
+                });
+            });
+        });
+
+        let display = document.getElementById('display');
+        let currentValue = '0';
+        let previousValue = '';
+        let operator = null;
+        let shouldResetDisplay = false;
+
+        function updateDisplay() {
+            display.textContent = currentValue;
+        }
+
+        function appendNumber(num) {
+            if (shouldResetDisplay) {
+                currentValue = num;
+                shouldResetDisplay = false;
+            } else {
+                if (currentValue === '0' && num !== '.') {
+                    currentValue = num;
+                } else if (num === '.' && currentValue.includes('.')) {
+                    return;
+                } else {
+                    currentValue += num;
+                }
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (operator !== null && !shouldResetDisplay) {
+                calculate();
+            }
+            previousValue = currentValue;
+            operator = op;
+            shouldResetDisplay = true;
+        }
+
+        function calculate() {
+            if (operator === null || shouldResetDisplay) {
+                return;
+            }
+
+            let result;
+            const prev = parseFloat(previousValue);
+            const current = parseFloat(currentValue);
+
+            switch (operator) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    result = current !== 0 ? prev / current : 'Error';
+                    break;
+                case '%':
+                    result = prev % current;
+                    break;
+                default:
+                    return;
+            }
+
+            currentValue = result.toString();
+            operator = null;
+            shouldResetDisplay = true;
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentValue = '0';
+            previousValue = '';
+            operator = null;
+            shouldResetDisplay = false;
+            updateDisplay();
+        }
+
+        updateDisplay();
+
+        document.getElementById('convert-currency').addEventListener('click', async function () {
+            const amount = Number(document.getElementById('currency-amount').value);
+            const from = document.getElementById('currency-from').value;
+            const to = document.getElementById('currency-to').value;
+            const result = document.getElementById('currency-result');
+            const status = document.getElementById('currency-status');
+
+            result.textContent = '';
+            status.textContent = '';
+            if (!Number.isFinite(amount) || amount < 0) {
+                status.textContent = 'Informe um valor válido, igual ou maior que zero.';
+                return;
+            }
+            if (from === to) {
+                result.textContent = new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: to
+                }).format(amount);
+                return;
+            }
+
+            const button = this;
+            button.disabled = true;
+            status.textContent = 'Consultando cotação...';
+            try {
+                const url = new URL('https://api.frankfurter.app/latest');
+                url.searchParams.set('amount', String(amount));
+                url.searchParams.set('from', from);
+                url.searchParams.set('to', to);
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('A consulta da cotação falhou.');
+                }
+                const data = await response.json();
+                const convertedAmount = data.rates && data.rates[to];
+                if (!Number.isFinite(convertedAmount)) {
+                    throw new Error('A cotação recebida é inválida.');
+                }
+                result.textContent = new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: to
+                }).format(convertedAmount);
+                status.textContent = 'Cotação de referência de ' + data.date + '.';
+            } catch (error) {
+                status.textContent = error.message + ' Verifique sua conexão e tente novamente.';
+            } finally {
+                button.disabled = false;
+            }
+        });
+
+        document.getElementById('convert-temperature').addEventListener('click', function () {
+            const value = Number(document.getElementById('temperature-value').value);
+            const from = document.getElementById('temperature-from').value;
+            const to = document.getElementById('temperature-to').value;
+            const result = document.getElementById('temperature-result');
+            const status = document.getElementById('temperature-status');
+
+            result.textContent = '';
+            status.textContent = '';
+            if (!Number.isFinite(value)) {
+                status.textContent = 'Informe uma temperatura válida.';
+                return;
+            }
+
+            const celsius = from === 'C'
+                ? value
+                : from === 'F'
+                    ? (value - 32) * 5 / 9
+                    : value - 273.15;
+            if (celsius < -273.15) {
+                status.textContent = 'A temperatura não pode ser inferior ao zero absoluto.';
+                return;
+            }
+
+            const convertedValue = to === 'C'
+                ? celsius
+                : to === 'F'
+                    ? celsius * 9 / 5 + 32
+                    : celsius + 273.15;
+            const unit = to === 'K' ? 'K' : '°' + to;
+            result.textContent = new Intl.NumberFormat('pt-BR', {
+                maximumFractionDigits: 2
+            }).format(convertedValue) + ' ' + unit;
+        });
+    </script>
+</body>
+</html>
