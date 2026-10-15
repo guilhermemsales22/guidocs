@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Controle de Circuitos</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+background:#0f172a;
+color:#fff;
+padding:20px;
+}
+
+.container{
+max-width:1400px;
+margin:auto;
+}
+
+h1{
+text-align:center;
+color:#38bdf8;
+margin-bottom:20px;
+}
+
+.topo{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:20px;
+}
+
+input,select{
+padding:10px;
+border:none;
+border-radius:8px;
+background:#1e293b;
+color:#fff;
+}
+
+button{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:#0284c7;
+color:#fff;
+}
+
+button:hover{
+background:#0369a1;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+margin-bottom:20px;
+}
+
+.card{
+background:#1e293b;
+border-radius:10px;
+padding:15px;
+text-align:center;
+}
+
+.card h2{
+margin-top:10px;
+}
+
+.meta-box{
+background:#1e293b;
+padding:15px;
+border-radius:10px;
+margin-bottom:20px;
+}
+
+.barra{
+height:25px;
+background:#334155;
+border-radius:20px;
+overflow:hidden;
+margin-top:10px;
+}
+
+#barraMeta{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#22c55e,#16a34a);
+transition:.3s;
+}
+
+#pesquisa{
+width:100%;
+margin-bottom:15px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:#1e293b;
+}
+
+th{
+background:#0284c7;
+padding:10px;
+}
+
+td{
+padding:8px;
+border:1px solid #334155;
+text-align:center;
+}
+
+td input{
+width:100%;
+}
+
+.btnExcluir{
+background:#dc2626;
+}
+
+.btnExcluir:hover{
+background:#b91c1c;
+}
+
+@media(max-width:768px){
+
+.topo{
+flex-direction:column;
+}
+
+input,select,button{
+width:100%;
+}
+
+table{
+font-size:12px;
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📊 Dashboard Controle de Circuitos</h1>
+
+<div class="topo">
+
+<label style="display:flex;align-items:center;gap:5px;">
+🎯 Meta
+<input type="number" id="meta" value="20" min="1" style="width:100px;">
+</label>
+
+<input
+type="text"
+id="circuito"
+placeholder="Número do Circuito">
+
+<input
+type="text"
+id="tarefa"
+placeholder="Tarefa">
+
+<select id="status">
+<option>Tratado</option>
+<option>Pendente</option>
+</select>
+
+<button onclick="adicionar()">
+➕ Adicionar
+</button>
+
+<button onclick="exportar()">
+📥 Exportar CSV
+</button>
+
+<button onclick="limparTudo()">
+🗑 Limpar Tudo
+</button>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+<div>Total</div>
+<h2 id="total">0</h2>
+</div>
+
+<div class="card">
+<div>Tratados</div>
+<h2 id="tratados">0</h2>
+</div>
+
+<div class="card">
+<div>Pendentes</div>
+<h2 id="pendentes">0</h2>
+</div>
+
+<div class="card">
+<div>Produtividade</div>
+<h2 id="produtividade">0%</h2>
+</div>
+
+</div>
+
+<div class="meta-box">
+
+<div style="display:flex;justify-content:space-between;">
+<span>🎯 Meta Diária</span>
+<span id="percentualMeta">0%</span>
+</div>
+
+<div class="barra">
+<div id="barraMeta"></div>
+</div>
+
+</div>
+
+<input
+type="text"
+id="pesquisa"
+placeholder="🔍 Pesquisar"
+onkeyup="filtrar()">
+
+<table>
+
+<thead>
+<tr>
+<th>Data/Hora</th>
+<th>Circuito</th>
+<th>Tarefa</th>
+<th>Status</th>
+<th>Ação</th>
+</tr>
+</thead>
+
+<tbody id="lista"></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+function registros(){
+return JSON.parse(localStorage.getItem("circuitos")) || [];
+}
+
+function salvar(dados){
+localStorage.setItem(
+"circuitos",
+JSON.stringify(dados)
+);
+}
+
+function adicionar(){
+
+let circuito =
+document.getElementById("circuito")
+.value.trim()
+.toUpperCase();
+
+if(!circuito){
+alert("Informe o circuito.");
+return;
+}
+
+let dados = registros();
+
+dados.push({
+dataHora:new Date().toLocaleString("pt-BR"),
+circuito:circuito,
+tarefa:document.getElementById("tarefa").value,
+status:document.getElementById("status").value
+});
+
+salvar(dados);
+
+document.getElementById("circuito").value="";
+document.getElementById("tarefa").value="";
+
+carregar();
+}
+
+function editarCampo(indice,campo,valor){
+
+let dados = registros();
+
+if(campo==="circuito"){
+valor=valor.toUpperCase();
+}
+
+dados[indice][campo]=valor;
+
+salvar(dados);
+}
+
+function alterarStatus(indice,status){
+
+let dados = registros();
+
+dados[indice].status=status;
+
+salvar(dados);
+
+carregar();
+}
+
+function excluir(indice){
+
+if(!confirm("Excluir registro?")){
+return;
+}
+
+let dados = registros();
+
+dados.splice(indice,1);
+
+salvar(dados);
+
+carregar();
+}
+
+function limparTudo(){
+
+if(!confirm("Excluir todos os registros?")){
+return;
+}
+
+localStorage.removeItem("circuitos");
+
+carregar();
+}
+
+function carregar(){
+
+let dados = registros();
+
+let html="";
+
+let tratados=0;
+let pendentes=0;
+
+dados.forEach((r,index)=>{
+
+if(r.status==="Tratado"){
+tratados++;
+}
+
+if(r.status==="Pendente"){
+pendentes++;
+}
+
+html+=`
+<tr>
+
+<td>${r.dataHora}</td>
+
+<td>
+<input
+value="${r.circuito}"
+onchange="editarCampo(${index},'circuito',this.value)">
+</td>
+
+<td>
+<input
+value="${r.tarefa || ''}"
+onchange="editarCampo(${index},'tarefa',this.value)">
+</td>
+
+<td>
+
+<select onchange="alterarStatus(${index},this.value)">
+
+<option value="Tratado"
+${r.status==="Tratado" ? "selected" : ""}>
+Tratado
+</option>
+
+<option value="Pendente"
+${r.status==="Pendente" ? "selected" : ""}>
+Pendente
+</option>
+
+</select>
+
+</td>
+
+<td>
+
+<button
+class="btnExcluir"
+onclick="excluir(${index})">
+Excluir
+</button>
+
+</td>
+
+</tr>
+`;
+});
+
+document.getElementById("lista").innerHTML=html;
+
+document.getElementById("total").innerText=dados.length;
+document.getElementById("tratados").innerText=tratados;
+document.getElementById("pendentes").innerText=pendentes;
+
+let meta=
+parseInt(
+document.getElementById("meta").value
+)||20;
+
+let produtividade=
+meta>0
+? (tratados/meta)*100
+:0;
+
+document.getElementById("produtividade")
+.innerText=
+produtividade.toFixed(1)+"%";
+
+document.getElementById("percentualMeta")
+.innerText=
+produtividade.toFixed(1)+"%";
+
+document.getElementById("barraMeta")
+.style.width=
+Math.min(produtividade,100)+"%";
+
+localStorage.setItem(
+"metaCircuitos",
+meta
+);
+}
+
+function filtrar() {
+
+    let texto =
+    document.getElementById("pesquisa")
+    .value
+    .toLowerCase()
+    .trim();
+
+    let linhas =
+    document.querySelectorAll("#lista tr");
+
+    linhas.forEach(linha => {
+
+        let circuito =
+        linha.querySelector("td:nth-child(2) input")
+        ?.value.toLowerCase() || "";
+
+        let tarefa =
+        linha.querySelector("td:nth-child(3) input")
+        ?.value.toLowerCase() || "";
+
+        let status =
+        linha.querySelector("select")
+        ?.value.toLowerCase() || "";
+
+        if (
+            circuito.includes(texto) ||
+            tarefa.includes(texto) ||
+            status.includes(texto)
+        ) {
+            linha.style.display = "";
+        } else {
+            linha.style.display = "none";
+        }
+
+    });
+
+}
+function exportar(){
+
+let dados=registros();
+
+if(dados.length===0){
+alert("Nenhum registro.");
+return;
+}
+
+let csv=
+"\uFEFFData/Hora;Circuito;Tarefa;Status\n";
+
+dados.forEach(r=>{
+
+csv+=
+`${r.dataHora};${r.circuito};"${r.tarefa || ""}";${r.status}\n`;
+
+});
+
+let blob=
+new Blob(
+[csv],
+{type:"text/csv;charset=utf-8;"}
+);
+
+let link=
+document.createElement("a");
+
+link.href=
+URL.createObjectURL(blob);
+
+link.download=
+"circuitos.csv";
+
+link.click();
+}
+
+document.getElementById("meta").value=
+localStorage.getItem("metaCircuitos") || 20;
+
+document.getElementById("meta")
+.addEventListener(
+"input",
+carregar
+);
+
+document.getElementById("circuito")
+.addEventListener(
+"keypress",
+function(e){
+if(e.key==="Enter"){
+adicionar();
+}
+}
+);
+
+document.getElementById("tarefa")
+.addEventListener(
+"keypress",
+function(e){
+if(e.key==="Enter"){
+adicionar();
+}
+}
+);
+
+carregar();
+
+</script>
+
+</body>
+</html>
